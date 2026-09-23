@@ -6,4 +6,4 @@ def pattern_Count(text, pattern):
             count += 1
     return count
 
-print(pattern_Count("ACGTACGTACGT", "CG"))
+print(pattern_Count("ACGTACGTACGTGT", "GT"))
