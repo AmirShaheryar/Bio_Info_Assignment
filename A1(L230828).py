@@ -157,53 +157,101 @@ print(median_string("AAATTGACGCAT GACGACCACGTT CGTCAGCGCCTG GCTGAGCACCGG AGTACGG
 #Q6
 
 def greedy_motif_search(dna, k, t):
+
     if isinstance(dna, str):
         dna = dna.split()
 
     def profile_most_probable_kmer(text, k, profile):
+
         best_kmer = ""
-        best_prob = -1.0
+        best_probability = -1
+
         for i in range(len(text) - k + 1):
+
             kmer = text[i:i+k]
-            prob = 1.0
-            for pos, base in enumerate(kmer):
-                prob *= profile[base][pos]
-            if prob > best_prob:
-                best_prob = prob
+            probability = 1
+
+            for pos in range(k):
+                base = kmer[pos]
+                probability = probability * profile[base][pos]
+
+            if probability > best_probability:
+                best_probability = probability
                 best_kmer = kmer
+
         return best_kmer
 
     def profile_with_pseudocounts(motifs):
-        profile = {base: [1] * k for base in "ACGT"}
+
+        profile = {
+            "A": [1] * k,
+            "C": [1] * k,
+            "G": [1] * k,
+            "T": [1] * k
+        }
+
         for motif in motifs:
-            for i, base in enumerate(motif):
+
+            for i in range(k):
+
+                base = motif[i]
                 profile[base][i] += 1
+
         for base in "ACGT":
+
             total = sum(profile[base])
-            profile[base] = [count / total for count in profile[base]]
+
+            for i in range(k):
+                profile[base][i] = profile[base][i] / total
+
         return profile
 
     def score(motifs):
+
         total = 0
-        for col in zip(*motifs):
-            counts = {base: col.count(base) for base in "ACGT"}
-            total += len(col) - max(counts.values())
+
+        for column in zip(*motifs):
+
+            max_count = 0
+
+            for base in "ACGT":
+
+                count = column.count(base)
+
+                if count > max_count:
+                    max_count = count
+
+            total = total + (len(column) - max_count)
+
         return total
 
-    best_motifs = [dna[0][i:i+k] for i in range(len(dna[0]) - k + 1)]
+    best_motifs = []
+
+    for i in range(len(dna[0]) - k + 1):
+        best_motifs.append(dna[0][i:i+k])
+
     best_motifs = best_motifs[:t]
 
     for start in range(len(dna[0]) - k + 1):
+
         motif = dna[0][start:start+k]
+
         motifs = [motif]
+
         for i in range(1, t):
+
             profile = profile_with_pseudocounts(motifs)
-            motifs.append(profile_most_probable_kmer(dna[i], k, profile))
+
+            best = profile_most_probable_kmer(
+                dna[i], k, profile
+            )
+
+            motifs.append(best)
+
         if score(motifs) < score(best_motifs):
             best_motifs = motifs
 
     return best_motifs
-
 
 print(greedy_motif_search("GGCGTTCAGGCA AAGAATCAGTCA CAAGGAGTTCGC CACGTCAATCAC CAATAATATTCG", 3, 5))
 
