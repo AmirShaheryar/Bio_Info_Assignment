@@ -32,7 +32,7 @@ def frequent_words(text, k):
             
     return frequent_kmers
 
-print(frequent_words("CGTTTTGAACATTTTCAACAAGTTTTGCAACATTTT ", 4))
+print(frequent_words("CGTTTTGAACATTTTCAACAAGTTTTGCAACATTTTAACA ", 4))
 
 #Q3
 
