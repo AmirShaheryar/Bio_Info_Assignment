@@ -56,6 +56,8 @@ def Minimum_Skew(text):
     return min_positions
 
 print(Minimum_Skew("CCGGCCGG"))
+print("\n")
+print(Minimum_Skew("CCGCCGG"))
 
 #Q4
 
