@@ -287,65 +287,100 @@ print(de_bruijn_kmers(["GAGG", "CAGG", "GGGG", "GGGA", "CAGG", "AGGG", "GGAG"]))
 #Q9
 
 def stringReconstructionReadPairs(pairs, k, d):
-    from collections import defaultdict
 
     def build_de_bruijn_graph(pairs):
-        graph = defaultdict(list)
-        for a, b in pairs:
+
+        graph = {}
+
+        for pair in pairs:
+
+            a = pair[0]
+            b = pair[1]
+
             prefix = (a[:-1], b[:-1])
             suffix = (a[1:], b[1:])
+
+            if prefix not in graph:
+                graph[prefix] = []
+
             graph[prefix].append(suffix)
+
         return graph
 
     def find_eulerian_path(graph):
-        from collections import defaultdict, deque
 
-        in_degree = defaultdict(int)
-        out_degree = defaultdict(int)
+        in_degree = {}
+        out_degree = {}
 
+        # Calculate degrees
         for node in graph:
-            out_degree[node] += len(graph[node])
+
+            out_degree[node] = len(graph[node])
+
             for neighbor in graph[node]:
+
+                if neighbor not in in_degree:
+                    in_degree[neighbor] = 0
+
                 in_degree[neighbor] += 1
 
         start_node = None
-        end_node = None
-        for node in set(in_degree.keys()).union(set(out_degree.keys())):
-            if out_degree[node] - in_degree[node] == 1:
+
+        for node in graph:
+
+            out = out_degree.get(node, 0)
+            inside = in_degree.get(node, 0)
+
+            if out - inside == 1:
                 start_node = node
-            elif in_degree[node] - out_degree[node] == 1:
-                end_node = node
+                break
 
         if start_node is None:
-            start_node = next(iter(graph))
+            start_node = list(graph.keys())[0]
 
         stack = [start_node]
         path = []
 
-        while stack:
-            current_node = stack[-1]
-            if current_node in graph and graph[current_node]:
-                next_node = graph[current_node].pop()
+        while len(stack) > 0:
+
+            current = stack[-1]
+
+            if current in graph and len(graph[current]) > 0:
+
+                next_node = graph[current].pop()
+
                 stack.append(next_node)
+
             else:
+
                 path.append(stack.pop())
 
-        return path[::-1]
+        path.reverse()
+
+        return path
 
     def reconstruct_string(path, k, d):
+
         prefix_string = path[0][0]
         suffix_string = path[0][1]
 
         for i in range(1, len(path)):
+
             prefix_string += path[i][0][-1]
             suffix_string += path[i][1][-1]
 
-        return prefix_string + suffix_string[-(k + d):]
+        answer = prefix_string + suffix_string[-(k + d):]
 
-    de_bruijn_graph = build_de_bruijn_graph(pairs)
-    eulerian_path = find_eulerian_path(de_bruijn_graph)
-    reconstructed_string = reconstruct_string(eulerian_path, k, d)
+        return answer
 
-    return reconstructed_string
 
-print(stringReconstructionReadPairs([("ACAC", "CTCT"), ("ACAT", "CTCA"), ("CACA", "TCTC"), ("GACA", "TCTC")], 4, 2))
+    graph = build_de_bruijn_graph(pairs)
+
+    path = find_eulerian_path(graph)
+
+    answer = reconstruct_string(path, k, d)
+
+    return answer
+
+
+print(stringReconstructionReadPairs([("ACAC", "CTCT"),("ACAT", "CTCA"),("CACA", "TCTC"),("GACA", "TCTC")],4,2))
