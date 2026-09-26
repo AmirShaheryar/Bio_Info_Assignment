@@ -1,3 +1,5 @@
+from itertools import product
+
 # Q1
 
 def pattern_Count(text, pattern):
@@ -99,24 +101,51 @@ print(frequent_words_with_mismatches("ACGTTGCATGTCGCATGATGCATGAGAGCT", 4, 1))
 
 #Q5
 
+from itertools import product
+
 def median_string(dna, k):
-    from itertools import product
 
     def hamming_distance(s1, s2):
-        return sum(el1 != el2 for el1, el2 in zip(s1, s2))
+        count = 0
+
+        for i in range(len(s1)):
+            if s1[i] != s2[i]:
+                count += 1
+
+        return count
 
     def all_kmers(k):
-        return [''.join(p) for p in product('ACGT', repeat=k)]
+        kmers = []
+
+        for p in product("ACGT", repeat=k):
+            kmers.append("".join(p))
+
+        return kmers
 
     kmers = all_kmers(k)
-    min_distance = float('inf')
+
+    min_distance = float("inf")
     median_kmer = None
 
     for kmer in kmers:
+
         total_distance = 0
+
         for seq in dna.split():
-            min_seq_distance = min(hamming_distance(kmer, seq[i:i+k]) for i in range(len(seq) - k + 1))
+
+            min_seq_distance = float("inf")
+
+            for i in range(len(seq) - k + 1):
+
+                substring = seq[i:i+k]
+
+                distance = hamming_distance(kmer, substring)
+
+                if distance < min_seq_distance:
+                    min_seq_distance = distance
+
             total_distance += min_seq_distance
+
         if total_distance < min_distance:
             min_distance = total_distance
             median_kmer = kmer
@@ -204,7 +233,6 @@ def de_bruijn_kmers(kmers):
             graph[prefix] = []
         graph[prefix].append(suffix)
     return graph
-
 
 print(de_bruijn_kmers(["GAGG", "CAGG", "GGGG", "GGGA", "CAGG", "AGGG", "GGAG"]))
 
